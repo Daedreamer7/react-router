@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from "react-router-dom";
+import type { ActionFunctionArgs } from "react-router-dom";
 import {
   Form,
   Link,
@@ -7,10 +7,10 @@ import {
   createBrowserRouter,
   redirect,
   useActionData,
-  useFetcher,
+  useFetchers,
   useLocation,
-  useNavigation,
-  useRouteLoaderData,
+  useNavigate,
+  useLoaderData,
 } from "react-router-dom";
 import { fakeAuthProvider } from "./auth";
 
@@ -99,8 +99,8 @@ function Layout() {
 
 function AuthStatus() {
   // Get our logged in user, if they exist, from the root route loader data
-  let { user } = useRouteLoaderData("root") as { user: string | null };
-  let fetcher = useFetcher();
+  let { user } = useLoaderData("root") as { user: string | null };
+  let fetcher = useFetchers();
 
   if (!user) {
     return <p>You are not logged in.</p>;
@@ -120,7 +120,7 @@ function AuthStatus() {
   );
 }
 
-async function loginAction({ request }: LoaderFunctionArgs) {
+async function loginAction({ request }: ActionFunctionArgs) {
   let formData = await request.formData();
   let username = formData.get("username") as string | null;
 
@@ -159,7 +159,7 @@ function LoginPage() {
   let params = new URLSearchParams(location.search);
   let from = params.get("from") || "/";
 
-  let navigation = useNavigation();
+  let navigation = useNavigate();
   let isLoggingIn = navigation.formData?.get("username") != null;
 
   let actionData = useActionData() as { error: string } | undefined;
@@ -188,7 +188,7 @@ function PublicPage() {
   return <h3>Public</h3>;
 }
 
-function protectedLoader({ request }: LoaderFunctionArgs) {
+function protectedLoader({ request }: ActionFunctionArgs) {
   // If the user is not logged in and tries to access `/protected`, we redirect
   // them to `/login` with a `from` parameter that allows login to redirect back
   // to this page upon successful authentication
